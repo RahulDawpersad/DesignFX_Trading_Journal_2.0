@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://public-frontend-cos.metadl.com/mgx/img/favicon.png" type="image/png">
+    <title>Trading Journal</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">📊DesignFX Trading Journal</h1>
+            <div class="header-actions">
+                <div class="account-switch">
+                    <button id="accountToggle" class="btn-account" aria-label="Switch Account">
+                        <span id="accountLabel">Real</span>
+                    </button>
+                </div>
+                <button id="themeToggle" class="btn-icon" aria-label="Toggle Theme">🌙</button>
+                <button id="settingsBtn" class="btn-icon" aria-label="Settings">⚙️</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Dashboard KPIs -->
+        <section class="dashboard">
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Balance</div>
+                    <div class="kpi-value" id="kpiBalance">$0.00</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Total P&L</div>
+                    <div class="kpi-value" id="kpiPnL">$0.00</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Win Rate</div>
+                    <div class="kpi-value" id="kpiWinRate">0%</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Trades</div>
+                    <div class="kpi-value" id="kpiTrades">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Avg Win</div>
+                    <div class="kpi-value" id="kpiAvgWin">$0.00</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Avg Loss</div>
+                    <div class="kpi-value" id="kpiAvgLoss">$0.00</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button id="addTradeBtn" class="btn btn-primary">+ Add Trade</button>
+                <button id="addDepositBtn" class="btn btn-secondary">💰 Add Deposit</button>
+                <button id="manageCategoriesBtn" class="btn btn-secondary">🏷️ Categories</button>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="charts-section">
+            <div class="chart-container">
+                <h3>Equity Curve</h3>
+                <canvas id="equityChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Profit by Symbol</h3>
+                <canvas id="symbolChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Filters -->
+        <section class="filters">
+            <div class="filter-group">
+                <input type="date" id="filterDateFrom" class="input-field" placeholder="From Date">
+                <input type="date" id="filterDateTo" class="input-field" placeholder="To Date">
+                <select id="filterSymbol" class="input-field">
+                    <option value="">All Symbols</option>
+                </select>
+                <select id="filterCategory" class="input-field">
+                    <option value="">All Categories</option>
+                </select>
+                <select id="filterType" class="input-field">
+                    <option value="">All Types</option>
+                    <option value="Buy">Buy</option>
+                    <option value="Sell">Sell</option>
+                </select>
+                <button id="clearFiltersBtn" class="btn btn-secondary">Clear</button>
+            </div>
+        </section>
+
+        <!-- Trades Table -->
+        <section class="trades-section">
+            <div class="section-header">
+                <h2>Trade History</h2>
+                <div class="table-actions">
+                    <button id="exportCSVBtn" class="btn btn-secondary">Export CSV</button>
+                    <button id="exportJSONBtn" class="btn btn-secondary">Export JSON</button>
+                    <button id="importBtn" class="btn btn-secondary">Import</button>
+                    <input type="file" id="importFile" accept=".json,.csv" style="display:none;">
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table class="trades-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll" aria-label="Select All"></th>
+                            <th data-sort="symbol">Symbol ↕</th>
+                            <th data-sort="type">Type ↕</th>
+                            <th data-sort="entryTime">Entry Time ↕</th>
+                            <th data-sort="exitTime">Exit Time ↕</th>
+                            <th data-sort="lots">Lots ↕</th>
+                            <th data-sort="entryPrice">Entry ↕</th>
+                            <th data-sort="exitPrice">Exit ↕</th>
+                            <th data-sort="profit">P&L ↕</th>
+                            <th data-sort="category">Category ↕</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tradesTableBody">
+                        <tr>
+                            <td colspan="11" class="empty-state">No trades yet. Click "Add Trade" to get started!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination">
+                <button id="prevPage" class="btn btn-secondary" disabled>Previous</button>
+                <span id="pageInfo">Page 1 of 1</span>
+                <button id="nextPage" class="btn btn-secondary" disabled>Next</button>
+            </div>
+            <button id="bulkDeleteBtn" class="btn btn-danger" style="display:none;">Delete Selected</button>
+        </section>
+    </main>
+
+    <!-- Modal: Add/Edit Trade -->
+    <div id="tradeModal" class="modal" role="dialog" aria-labelledby="tradeModalTitle" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="tradeModalTitle">Add Trade</h2>
+                <button class="modal-close" aria-label="Close">&times;</button>
+            </div>
+            <form id="tradeForm">
+                <input type="hidden" id="tradeId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="tradeSymbol">Symbol *</label>
+                        <input type="text" id="tradeSymbol" class="input-field" required placeholder="e.g., XAU/USD">
+                    </div>
+                    <div class="form-group">
+                        <label for="tradeType">Type *</label>
+                        <select id="tradeType" class="input-field" required>
+                            <option value="Buy">Buy</option>
+                            <option value="Sell">Sell</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tradeEntryTime">Entry Time *</label>
+                        <input type="datetime-local" id="tradeEntryTime" class="input-field" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tradeExitTime">Exit Time *</label>
+                        <input type="datetime-local" id="tradeExitTime" class="input-field" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tradeLots">Lots/Size *</label>
+                        <input type="number" id="tradeLots" class="input-field" step="0.01" required placeholder="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="tradeEntryPrice">Entry Price *</label>
+                        <input type="number" id="tradeEntryPrice" class="input-field" step="0.001" required placeholder="0.000">
+                    </div>
+                    <div class="form-group">
+                        <label for="tradeExitPrice">Exit Price *</label>
+                        <input type="number" id="tradeExitPrice" class="input-field" step="0.001" required placeholder="0.000">
+                    </div>
+                    <div class="form-group">
+                        <label for="tradeProfit">Profit/Loss *</label>
+                        <input type="number" id="tradeProfit" class="input-field" step="0.01" required placeholder="Auto-calculated">
+                    </div>
+                    <div class="form-group">
+                        <label for="tradeCurrency">Currency</label>
+                        <input type="text" id="tradeCurrency" class="input-field" value="ZAR" placeholder="ZAR">
+                    </div>
+                    <div class="form-group">
+                        <label for="tradeFees">Fees/Commissions</label>
+                        <input type="number" id="tradeFees" class="input-field" step="0.01" value="0" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="tradeCategory">Category</label>
+                        <select id="tradeCategory" class="input-field">
+                            <option value="">None</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="tradeNotes">Notes</label>
+                        <textarea id="tradeNotes" class="input-field" rows="3" placeholder="Trade notes..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary modal-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Trade</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add/Edit Deposit -->
+    <div id="depositModal" class="modal" role="dialog" aria-labelledby="depositModalTitle" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="depositModalTitle">Add Deposit/Withdrawal</h2>
+                <button class="modal-close" aria-label="Close">&times;</button>
+            </div>
+            <form id="depositForm">
+                <input type="hidden" id="depositId">
+                <div class="form-group">
+                    <label for="depositType">Type *</label>
+                    <select id="depositType" class="input-field" required>
+                        <option value="deposit">Deposit</option>
+                        <option value="withdrawal">Withdrawal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="depositAmount">Amount *</label>
+                    <input type="number" id="depositAmount" class="input-field" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="depositDate">Date *</label>
+                    <input type="datetime-local" id="depositDate" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="depositNotes">Notes</label>
+                    <textarea id="depositNotes" class="input-field" rows="3" placeholder="Optional notes..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary modal-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Manage Categories -->
+    <div id="categoriesModal" class="modal" role="dialog" aria-labelledby="categoriesModalTitle" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="categoriesModalTitle">Manage Categories</h2>
+                <button class="modal-close" aria-label="Close">&times;</button>
+            </div>
+            <div class="categories-content">
+                <div class="form-group">
+                    <label for="newCategory">New Category</label>
+                    <div class="input-group">
+                        <input type="text" id="newCategory" class="input-field" placeholder="Category name">
+                        <button id="addCategoryBtn" class="btn btn-primary">Add</button>
+                    </div>
+                </div>
+                <ul id="categoriesList" class="categories-list"></ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary modal-cancel">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Settings -->
+    <div id="settingsModal" class="modal" role="dialog" aria-labelledby="settingsModalTitle" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="settingsModalTitle">Settings</h2>
+                <button class="modal-close" aria-label="Close">&times;</button>
+            </div>
+            <form id="settingsForm">
+                <div class="form-group">
+                    <label for="settingsCurrency">Preferred Currency</label>
+                    <input type="text" id="settingsCurrency" class="input-field" placeholder="ZAR">
+                </div>
+                <div class="form-group">
+                    <label for="settingsDecimals">Decimal Places</label>
+                    <input type="number" id="settingsDecimals" class="input-field" min="0" max="8" value="2">
+                </div>
+                <div class="form-group">
+                    <label for="settingsDefaultAccount">Default Account</label>
+                    <select id="settingsDefaultAccount" class="input-field">
+                        <option value="real">Real</option>
+                        <option value="demo">Demo</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary modal-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+    <script type="module" src="./script.js"></script>
+</body>
+</html>
