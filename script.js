@@ -470,6 +470,9 @@ class UIManager {
         document.getElementById('addDepositBtn').addEventListener('click', () => this.openDepositModal());
         document.getElementById('depositForm').addEventListener('submit', (e) => this.saveDeposit(e));
         
+        // Manage Deposits
+        document.getElementById('manageDepositsBtn').addEventListener('click', () => this.openDepositsModal());
+        
         // Categories modal
         document.getElementById('manageCategoriesBtn').addEventListener('click', () => this.openCategoriesModal());
         document.getElementById('addCategoryBtn').addEventListener('click', () => this.addCategory());
@@ -728,7 +731,62 @@ class UIManager {
         }
         
         this.closeModal('depositModal');
+        if (document.getElementById('depositsModal').classList.contains('active')) {
+            this.renderDepositsList();
+        }
         this.render();
+    }
+
+    openDepositsModal() {
+        this.renderDepositsList();
+        this.openModal('depositsModal');
+    }
+
+    renderDepositsList() {
+    const list = document.getElementById('depositsList');
+    const deposits = this.dm.getDeposits().sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+    // ---- calculate totals ----
+    let totalDep = 0, totalWith = 0;
+    deposits.forEach(d => {
+        const amt = parseFloat(d.amount);
+        d.type === 'deposit' ? totalDep += amt : totalWith += amt;
+    });
+    document.getElementById('totalDeposits').textContent   = this.formatCurrency(totalDep);
+    document.getElementById('totalWithdrawals').textContent = this.formatCurrency(totalWith);
+    // --------------------------------
+
+    if (deposits.length === 0) {
+        list.innerHTML = '<li class="empty-state">No deposits/withdrawals yet</li>';
+    } else {
+        list.innerHTML = deposits.map(dep => {
+            const amount = parseFloat(dep.amount);
+            const sign   = dep.type === 'deposit' ? '+' : '-';
+            const cls    = dep.type === 'deposit' ? 'positive' : 'negative';
+            return `
+                <li>
+                    <span class="deposit-info">
+                        <span class="${cls}">${sign} ${this.formatCurrency(amount)}</span>
+                        – ${this.formatDateTime(dep.date)}
+                        ${dep.notes ? ` – ${this.escapeHtml(dep.notes)}` : ''}
+                    </span>
+                    <div class="deposit-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="ui.openDepositModal('${dep.id}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="ui.deleteDeposit('${dep.id}')">Delete</button>
+                    </div>
+                </li>
+            `;
+        }).join('');
+    }
+}
+
+    deleteDeposit(depositId) {
+        if (confirm('Are you sure you want to delete this deposit/withdrawal?')) {
+            this.dm.deleteDeposit(depositId);
+            this.showToast('Deposit deleted', 'success');
+            this.renderDepositsList();
+            this.render();
+        }
     }
 
     // Category Management
