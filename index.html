@@ -60,6 +60,7 @@
             <div class="quick-actions">
                 <button id="addTradeBtn" class="btn btn-primary">+ Add Trade</button>
                 <button id="addDepositBtn" class="btn btn-secondary">💰 Add Deposit</button>
+                <button id="manageDepositsBtn" class="btn btn-secondary">📋 Manage Deposits</button>
                 <button id="manageCategoriesBtn" class="btn btn-secondary">🏷️ Categories</button>
             </div>
         </section>
@@ -247,6 +248,40 @@
             </form>
         </div>
     </div>
+
+    <!-- Modal: Manage Deposits -->
+    <!-- Modal: Manage Deposits -->
+<div id="depositsModal" class="modal" role="dialog" aria-labelledby="depositsModalTitle" aria-hidden="true">
+    <div class="modal-content modal-deposits">
+        <div class="modal-header">
+            <h2 id="depositsModalTitle" class="modal-title">Manage Deposits / Withdrawals</h2>
+            <button class="modal-close" aria-label="Close">×</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="deposits-header">
+                <button id="addDepositBtnModal" class="btn btn-primary btn-sm">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                    Add New
+                </button>
+                <div class="deposits-summary">
+                    <span class="summary-item">
+                        <strong>Total Deposits:</strong> <span id="totalDeposits">ZAR 0.00</span>
+                    </span>
+                    <span class="summary-item">
+                        <strong>Total Withdrawals:</strong> <span id="totalWithdrawals">ZAR 0.00</span>
+                    </span>
+                </div>
+            </div>
+
+            <ul id="depositsList" class="deposits-list"></ul>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary modal-cancel">Done</button>
+        </div>
+    </div>
+</div>
 
     <!-- Modal: Manage Categories -->
     <div id="categoriesModal" class="modal" role="dialog" aria-labelledby="categoriesModalTitle" aria-hidden="true">
