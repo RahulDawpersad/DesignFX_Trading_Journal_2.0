@@ -627,3 +627,113 @@ body {
         transition-duration: 0.01ms !important;
     }
 }
+
+
+
+
+
+
+
+/* -------------------------------------------------
+   Modal – Deposits (modern look)
+   ------------------------------------------------- */
+.modal-deposits {
+    max-width: 720px;               /* a bit wider for a comfortable table */
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.15);
+    background: var(--bg-primary, #fff);
+}
+
+/* Header */
+.modal-deposits .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+}
+.modal-deposits .modal-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary, #1a202c);
+}
+
+/* Body */
+.modal-deposits .modal-body {
+    padding: 1rem 1.5rem;
+    max-height: 65vh;
+    overflow-y: auto;
+}
+
+/* Toolbar */
+.deposits-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: .75rem;
+}
+.deposits-header .btn-sm svg {
+    margin-right: .4rem;
+}
+.deposits-summary {
+    display: flex;
+    gap: 1.5rem;
+    font-size: .9rem;
+    color: var(--text-muted, #718096);
+}
+.summary-item strong {
+    color: var(--text-primary, #1a202c);
+}
+
+/* List */
+.deposits-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.deposits-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .75rem 1rem;
+    margin-bottom: .5rem;
+    background: var(--bg-secondary, #f7fafc);
+    border-radius: 8px;
+    transition: background .2s, transform .15s;
+}
+.deposits-list li:hover {
+    background: var(--bg-hover, #edf2f7);
+    transform: translateY(-1px);
+}
+.deposits-list .deposit-info {
+    flex: 1;
+    font-size: .95rem;
+}
+.deposits-list .deposit-info .positive { color: var(--success, #38a169); }
+.deposits-list .deposit-info .negative { color: var(--danger, #e53e3e); }
+.deposits-list .deposit-actions {
+    display: flex;
+    gap: .4rem;
+}
+.deposits-list .deposit-actions .btn-sm {
+    padding: .25rem .5rem;
+    font-size: .8rem;
+}
+
+/* Empty state */
+.deposits-list .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted, #718096);
+    font-style: italic;
+}
+
+/* Footer */
+.modal-deposits .modal-footer {
+    padding: .75rem 1.5rem;
+    border-top: 1px solid var(--border-color, #e2e8f0);
+    text-align: right;
+}
