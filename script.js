@@ -1016,8 +1016,8 @@ class UIManager {
                         <td>${this.formatDateTime(trade.entryTime)}</td>
                         <td>${this.formatDateTime(trade.exitTime)}</td>
                         <td>${trade.lots}</td>
-                        <td>${this.formatCurrency(trade.entryPrice)}</td>
-                        <td>${this.formatCurrency(trade.exitPrice)}</td>
+                       <td>${parseFloat(trade.entryPrice).toFixed(2)}</td>
+<td>${parseFloat(trade.exitPrice).toFixed(2)}</td>
                         <td class="${profitClass}">${this.formatCurrency(netProfit)}</td>
                         <td>${this.escapeHtml(trade.category || '-')}</td>
                         <td class="trade-actions">
