@@ -316,15 +316,10 @@ class Analytics {
         const data = [];
         let balance = 0;
        
-        const deposits = this.dm.getDeposits();
-        deposits.forEach(d => {
-            balance += d.type === 'deposit' ? parseFloat(d.amount) : -parseFloat(d.amount);
-        });
-       
         if (trades.length > 0) {
             data.push({
                 x: 0,
-                y: balance,
+                y: 0,
                 date: new Date(trades[0].exitTime)
             });
         }
@@ -1036,7 +1031,7 @@ class UIManager {
         type: 'line',
         data: {
             datasets: [{
-                label: 'Equity Curve',
+                label: 'Trades Performance',
                 data: dataPoints,
                 parsing: {
                     xAxisKey: 'x',
@@ -1060,12 +1055,12 @@ class UIManager {
                         title: function(context) {
                             const raw = context[0].raw;
                             if (raw.x === 0) {
-                                return 'Initial';
+                                return 'Start';
                             }
                             return `Trade ${raw.x}`;
                         },
                         label: function(context) {
-                            let label = 'Balance: ' + this.formatCurrency(context.parsed.y);
+                            let label = 'PnL: ' + this.formatCurrency(context.parsed.y);
                             label += '\nDate: ' + this.formatDateTime(context.raw.date);
                             return label;
                         }.bind(this)
@@ -1083,7 +1078,7 @@ class UIManager {
                 y: {
                     title: {
                         display: true,
-                        text: 'Equity'
+                        text: 'Cumulative PnL'
                     },
                     ticks: {
                         callback: (value) => this.formatCurrency(value)
