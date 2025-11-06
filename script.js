@@ -1115,46 +1115,46 @@ class UIManager {
         this.renderSymbolChart();
     }
 
-    renderEquityChart() {
-        const ctx = document.getElementById('equityChart');
-        const data = this.analytics.getEquityCurveData();
-        
-        if (this.charts.equity) {
-            this.charts.equity.destroy();
-        }
-        
-        this.charts.equity = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.map(d => this.formatDate(d.date)),
-                datasets: [{
-                    label: 'Balance',
-                    data: data.map(d => d.balance),
-                    borderColor: 'rgb(13, 110, 253)',
-                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                    tension: 0.1,
-                    fill: true
-                }]
+   renderEquityChart() {
+    const ctx = document.getElementById('equityChart');
+    const data = this.analytics.getEquityCurveData();
+   
+    if (this.charts.equity) {
+        this.charts.equity.destroy();
+    }
+   
+    this.charts.equity = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(d => this.formatDateTime(d.date)),
+            datasets: [{
+                label: 'Balance',
+                data: data.map(d => d.balance),
+                borderColor: 'rgb(13, 110, 253)',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                tension: 0.1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        ticks: {
-                            callback: (value) => this.formatCurrency(value)
-                        }
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    ticks: {
+                        callback: (value) => this.formatCurrency(value)
                     }
                 }
             }
-        });
-    }
+        }
+    });
+}
 
     renderSymbolChart() {
         const ctx = document.getElementById('symbolChart');
