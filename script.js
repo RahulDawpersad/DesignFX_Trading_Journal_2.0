@@ -316,6 +316,19 @@ class Analytics {
         const data = [];
         let balance = 0;
        
+        const deposits = this.dm.getDeposits();
+        deposits.forEach(d => {
+            balance += d.type === 'deposit' ? parseFloat(d.amount) : -parseFloat(d.amount);
+        });
+       
+        if (trades.length > 0) {
+            data.push({
+                x: 0,
+                y: balance,
+                date: new Date(trades[0].exitTime)
+            });
+        }
+       
         trades.forEach((t, index) => {
             balance += parseFloat(t.profit || 0) - parseFloat(t.fees || 0);
             data.push({
@@ -1045,7 +1058,11 @@ class UIManager {
                 tooltip: {
                     callbacks: {
                         title: function(context) {
-                            return `Trade ${context[0].raw.x}`;
+                            const raw = context[0].raw;
+                            if (raw.x === 0) {
+                                return 'Initial';
+                            }
+                            return `Trade ${raw.x}`;
                         },
                         label: function(context) {
                             let label = 'Balance: ' + this.formatCurrency(context.parsed.y);
@@ -1066,7 +1083,7 @@ class UIManager {
                 y: {
                     title: {
                         display: true,
-                        text: 'Cumulative PnL'
+                        text: 'Equity'
                     },
                     ticks: {
                         callback: (value) => this.formatCurrency(value)
