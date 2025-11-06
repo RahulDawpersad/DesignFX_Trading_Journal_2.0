@@ -585,41 +585,42 @@ class UIManager {
     }
 
     // Trade Management
-    openTradeModal(tradeId = null) {
-        const form = document.getElementById('tradeForm');
-        form.reset();
-        
-        if (tradeId) {
-            const trade = this.dm.getTrades().find(t => t.id === tradeId);
-            if (trade) {
-                document.getElementById('tradeModalTitle').textContent = 'Edit Trade';
-                document.getElementById('tradeId').value = trade.id;
-                document.getElementById('tradeSymbol').value = trade.symbol;
-                document.getElementById('tradeType').value = trade.type;
-                document.getElementById('tradeEntryTime').value = this.formatDateTimeLocal(trade.entryTime);
-                document.getElementById('tradeExitTime').value = this.formatDateTimeLocal(trade.exitTime);
-                document.getElementById('tradeLots').value = trade.lots;
-                document.getElementById('tradeEntryPrice').value = trade.entryPrice;
-                document.getElementById('tradeExitPrice').value = trade.exitPrice;
-                document.getElementById('tradeProfit').value = trade.profit;
-                document.getElementById('tradeCurrency').value = trade.currency || 'ZAR';
-                document.getElementById('tradeFees').value = trade.fees || 0;
-                document.getElementById('tradeCategory').value = trade.category || '';
-                document.getElementById('tradeNotes').value = trade.notes || '';
-            }
-        } else {
-            document.getElementById('tradeModalTitle').textContent = 'Add Trade';
-            document.getElementById('tradeCurrency').value = 'ZAR';
-            document.getElementById('tradeFees').value = 0;
-            // Set current datetime
-            const now = new Date();
-            document.getElementById('tradeEntryTime').value = this.formatDateTimeLocal(now);
-            document.getElementById('tradeExitTime').value = this.formatDateTimeLocal(now);
+  openTradeModal(tradeId = null) {
+    const form = document.getElementById('tradeForm');
+    form.reset();
+   
+    if (tradeId) {
+        const trade = this.dm.getTrades().find(t => t.id === tradeId);
+        if (trade) {
+            document.getElementById('tradeModalTitle').textContent = 'Edit Trade';
+            document.getElementById('tradeId').value = trade.id;
+            document.getElementById('tradeSymbol').value = trade.symbol;
+            document.getElementById('tradeType').value = trade.type;
+            document.getElementById('tradeEntryTime').value = this.formatDateTimeLocal(trade.entryTime);
+            document.getElementById('tradeExitTime').value = this.formatDateTimeLocal(trade.exitTime);
+            document.getElementById('tradeLots').value = trade.lots;
+            document.getElementById('tradeEntryPrice').value = trade.entryPrice;
+            document.getElementById('tradeExitPrice').value = trade.exitPrice;
+            document.getElementById('tradeProfit').value = trade.profit;
+            document.getElementById('tradeCurrency').value = trade.currency || 'ZAR';
+            document.getElementById('tradeFees').value = trade.fees || 0;
+            document.getElementById('tradeCategory').value = trade.category || '';
+            document.getElementById('tradeNotes').value = trade.notes || '';
         }
-        
-        this.updateCategorySelect();
-        this.openModal('tradeModal');
+    } else {
+        document.getElementById('tradeModalTitle').textContent = 'Add Trade';
+        document.getElementById('tradeId').value = '';  // Explicitly clear ID for new trades
+        document.getElementById('tradeCurrency').value = 'ZAR';
+        document.getElementById('tradeFees').value = 0;
+        // Set current datetime
+        const now = new Date();
+        document.getElementById('tradeEntryTime').value = this.formatDateTimeLocal(now);
+        document.getElementById('tradeExitTime').value = this.formatDateTimeLocal(now);
     }
+   
+    this.updateCategorySelect();
+    this.openModal('tradeModal');
+}
 
    autoCalculateProfit() {
     const profitInput = document.getElementById('tradeProfit');
