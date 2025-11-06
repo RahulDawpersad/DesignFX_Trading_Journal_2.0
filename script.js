@@ -621,19 +621,24 @@ class UIManager {
         this.openModal('tradeModal');
     }
 
-    autoCalculateProfit() {
-        const entryPrice = parseFloat(document.getElementById('tradeEntryPrice').value) || 0;
-        const exitPrice = parseFloat(document.getElementById('tradeExitPrice').value) || 0;
-        const lots = parseFloat(document.getElementById('tradeLots').value) || 0;
-        const type = document.getElementById('tradeType').value;
-        
-        if (entryPrice && exitPrice && lots) {
-            let priceDiff = type === 'Buy' ? (exitPrice - entryPrice) : (entryPrice - exitPrice);
-            // Simplified calculation - adjust multiplier based on instrument
-            let profit = priceDiff * lots * 100; // Basic forex calculation
-            document.getElementById('tradeProfit').value = profit.toFixed(2);
-        }
+   autoCalculateProfit() {
+    const profitInput = document.getElementById('tradeProfit');
+    if (profitInput.value.trim() !== '') {
+        return; // Don't overwrite if profit/loss is already manually entered
     }
+
+    const entryPrice = parseFloat(document.getElementById('tradeEntryPrice').value) || 0;
+    const exitPrice = parseFloat(document.getElementById('tradeExitPrice').value) || 0;
+    const lots = parseFloat(document.getElementById('tradeLots').value) || 0;
+    const type = document.getElementById('tradeType').value;
+
+    if (entryPrice && exitPrice && lots) {
+        let priceDiff = type === 'Buy' ? (exitPrice - entryPrice) : (entryPrice - exitPrice);
+        // Simplified calculation - adjust multiplier based on instrument
+        let profit = priceDiff * lots * 100; // Basic forex calculation
+        profitInput.value = profit.toFixed(2);
+    }
+}
 
     saveTrade(e) {
         e.preventDefault();
