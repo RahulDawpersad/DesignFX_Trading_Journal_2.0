@@ -316,11 +316,12 @@ class Analytics {
         const data = [];
         let balance = 0;
        
-        trades.forEach(t => {
+        trades.forEach((t, index) => {
             balance += parseFloat(t.profit || 0) - parseFloat(t.fees || 0);
             data.push({
-                date: new Date(t.exitTime),
-                balance: balance
+                x: index + 1,
+                y: balance,
+                date: new Date(t.exitTime)
             });
         });
        
@@ -1011,8 +1012,8 @@ class UIManager {
         this.renderSymbolChart();
     }
    renderEquityChart() {
-    const ctx = document.getElementById('equityChart');
-    const data = this.analytics.getEquityCurveData();
+    const ctx = document.getElementById('equityChart').getContext('2d');
+    const dataPoints = this.analytics.getEquityCurveData();
   
     if (this.charts.equity) {
         this.charts.equity.destroy();
@@ -1021,13 +1022,16 @@ class UIManager {
     this.charts.equity = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: data.map(d => this.formatDateTime(d.date)),
             datasets: [{
-                label: 'Cumulative PnL',
-                data: data.map(d => d.balance),
+                label: 'Equity Curve',
+                data: dataPoints,
+                parsing: {
+                    xAxisKey: 'x',
+                    yAxisKey: 'y'
+                },
                 borderColor: 'rgb(13, 110, 253)',
                 backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                tension: 0.1,
+                tension: 0.4,
                 fill: true
             }]
         },
@@ -1037,11 +1041,33 @@ class UIManager {
             plugins: {
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            return `Trade ${context[0].raw.x}`;
+                        },
+                        label: function(context) {
+                            let label = 'Balance: ' + this.formatCurrency(context.parsed.y);
+                            label += '\nDate: ' + this.formatDateTime(context.raw.date);
+                            return label;
+                        }.bind(this)
+                    }
                 }
             },
             scales: {
+                x: {
+                    type: 'linear',
+                    title: {
+                        display: true,
+                        text: 'Trade Number'
+                    }
+                },
                 y: {
-                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Cumulative PnL'
+                    },
                     ticks: {
                         callback: (value) => this.formatCurrency(value)
                     }
