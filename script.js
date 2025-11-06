@@ -113,13 +113,19 @@ class DataManager {
         return null;
     }
 
-    deleteTrade(id) {
+   deleteTrade(id) {
         const accountData = this.getCurrentAccountData();
         const index = accountData.trades.findIndex(t => t.id === id);
         if (index !== -1) {
-            accountData.trades.splice(index, 1);
-            this.saveData();
-            return true;
+            const removedTrade = accountData.trades.splice(index, 1)[0];
+            if (this.saveData()) {
+                return true;
+            } else {
+                // Revert the deletion to keep in-memory data consistent
+                accountData.trades.splice(index, 0, removedTrade);
+                console.error('Failed to save data after deletion');
+                return false;
+            }
         }
         return false;
     }
