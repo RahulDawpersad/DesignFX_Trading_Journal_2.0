@@ -313,15 +313,8 @@ class Analytics {
             new Date(a.exitTime) - new Date(b.exitTime)
         );
        
-        const deposits = this.dm.getDeposits();
-       
-        let totalDeposits = 0;
-        deposits.forEach(d => {
-            totalDeposits += d.type === 'deposit' ? parseFloat(d.amount) : -parseFloat(d.amount);
-        });
-       
         const data = [];
-        let balance = totalDeposits;
+        let balance = 0;
        
         trades.forEach(t => {
             balance += parseFloat(t.profit || 0) - parseFloat(t.fees || 0);
@@ -1030,7 +1023,7 @@ class UIManager {
         data: {
             labels: data.map(d => this.formatDateTime(d.date)),
             datasets: [{
-                label: 'Equity Curve',
+                label: 'Cumulative PnL',
                 data: data.map(d => d.balance),
                 borderColor: 'rgb(13, 110, 253)',
                 backgroundColor: 'rgba(13, 110, 253, 0.1)',
