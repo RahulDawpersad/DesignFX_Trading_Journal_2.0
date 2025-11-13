@@ -370,7 +370,8 @@ body {
 }
 
 .profit-positive {
-    color: var(--success);
+    /* color: var(--success); */
+    color: Chartreuse;
     font-weight: 600;
 }
 
