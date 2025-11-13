@@ -371,7 +371,7 @@ body {
 
 .profit-positive {
     /* color: var(--success); */
-    color: Chartreuse;
+    color: #28A745;
     font-weight: 600;
 }
 
