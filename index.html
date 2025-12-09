@@ -7,6 +7,85 @@
     <title>Trading Journal</title>
     <link rel="stylesheet" href="./style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+    /* Styles for Previous Trades Modal */
+#previousTradesModal .modal-content {
+    max-width: 800px;
+    width: 90vw;
+}
+
+#previousTradesModal .modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.deposits-list .cycle-item {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid var(--border-color, #e0e0e0);
+    border-radius: 8px;
+    background-color: var(--bg-secondary, #f9f9f9);
+}
+
+.deposits-list .cycle-item .cycle-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.deposits-list .cycle-item .cycle-summary strong {
+    color: var(--text-primary, #333);
+}
+
+.deposits-list .cycle-item .cycle-summary .toggle-trades {
+    font-size: 12px;
+    padding: 4px 8px;
+    margin-left: 10px;
+}
+
+.deposits-list .cycle-item .cycle-trades-list {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color, #e0e0e0);
+}
+
+.deposits-list .cycle-item .cycle-trades-list ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.deposits-list .cycle-item .cycle-trades-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
+    font-size: 13px;
+    color: var(--text-secondary, #666);
+}
+
+.deposits-list .cycle-item .cycle-trades-list li:last-child {
+    border-bottom: none;
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .deposits-list .cycle-item {
+    border-color: #444;
+    background-color: #2a2a2a;
+}
+
+[data-theme="dark"] .deposits-list .cycle-item .cycle-summary strong {
+    color: #ddd;
+}
+
+[data-theme="dark"] .deposits-list .cycle-item .cycle-trades-list {
+    border-top-color: #444;
+}
+
+[data-theme="dark"] .deposits-list .cycle-item .cycle-trades-list li {
+    border-bottom-color: #444;
+    color: #bbb;
+}
+</sytle>
 </head>
 <body>
     <!-- Header -->
