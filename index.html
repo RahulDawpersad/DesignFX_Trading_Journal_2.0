@@ -24,7 +24,6 @@
             </div>
         </div>
     </header>
-
     <!-- Main Container -->
     <main class="container">
         <!-- Dashboard KPIs -->
@@ -55,16 +54,15 @@
                     <div class="kpi-value" id="kpiAvgLoss">$0.00</div>
                 </div>
             </div>
-
             <!-- Quick Actions -->
             <div class="quick-actions">
                 <button id="addTradeBtn" class="btn btn-primary">+ Add Trade</button>
                 <button id="addDepositBtn" class="btn btn-secondary">💰 Add Deposit</button>
                 <button id="manageDepositsBtn" class="btn btn-secondary">📋 Manage Deposits</button>
                 <button id="manageCategoriesBtn" class="btn btn-secondary">🏷️ Categories</button>
+                <button id="previousTradesBtn" class="btn btn-secondary">📜 Previous Trades</button>
             </div>
         </section>
-
         <!-- Charts Section -->
         <section class="charts-section">
             <div class="chart-container">
@@ -76,7 +74,6 @@
                 <canvas id="symbolChart"></canvas>
             </div>
         </section>
-
         <!-- Filters -->
         <section class="filters">
             <div class="filter-group">
@@ -96,7 +93,6 @@
                 <button id="clearFiltersBtn" class="btn btn-secondary">Clear</button>
             </div>
         </section>
-
         <!-- Trades Table -->
         <section class="trades-section">
             <div class="section-header">
@@ -140,7 +136,6 @@
             <button id="bulkDeleteBtn" class="btn btn-danger" style="display:none;">Delete Selected</button>
         </section>
     </main>
-
     <!-- Modal: Add/Edit Trade -->
     <div id="tradeModal" class="modal" role="dialog" aria-labelledby="tradeModalTitle" aria-hidden="true">
         <div class="modal-content">
@@ -212,7 +207,6 @@
             </form>
         </div>
     </div>
-
     <!-- Modal: Add/Edit Deposit -->
     <div id="depositModal" class="modal" role="dialog" aria-labelledby="depositModalTitle" aria-hidden="true">
         <div class="modal-content">
@@ -248,7 +242,6 @@
             </form>
         </div>
     </div>
-
     <!-- Modal: Manage Deposits -->
     <!-- Modal: Manage Deposits -->
 <div id="depositsModal" class="modal" role="dialog" aria-labelledby="depositsModalTitle" aria-hidden="true">
@@ -257,7 +250,6 @@
             <h2 id="depositsModalTitle" class="modal-title">Manage Deposits / Withdrawals</h2>
             <button class="modal-close" aria-label="Close">×</button>
         </div>
-
         <div class="modal-body">
             <div class="deposits-header">
                 <button id="addDepositBtnModal" class="btn btn-primary btn-sm">
@@ -273,16 +265,13 @@
                     </span>
                 </div>
             </div>
-
             <ul id="depositsList" class="deposits-list"></ul>
         </div>
-
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary modal-cancel">Done</button>
         </div>
     </div>
 </div>
-
     <!-- Modal: Manage Categories -->
     <div id="categoriesModal" class="modal" role="dialog" aria-labelledby="categoriesModalTitle" aria-hidden="true">
         <div class="modal-content">
@@ -305,7 +294,21 @@
             </div>
         </div>
     </div>
-
+    <!-- Modal: Previous Trades -->
+    <div id="previousTradesModal" class="modal" role="dialog" aria-labelledby="previousTradesModalTitle" aria-hidden="true">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="previousTradesModalTitle">Previous Trades</h2>
+                <button class="modal-close" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <ul id="previousCyclesList" class="deposits-list"></ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary modal-cancel">Close</button>
+            </div>
+        </div>
+    </div>
     <!-- Modal: Settings -->
     <div id="settingsModal" class="modal" role="dialog" aria-labelledby="settingsModalTitle" aria-hidden="true">
         <div class="modal-content">
@@ -336,10 +339,8 @@
             </form>
         </div>
     </div>
-
     <!-- Toast Notification -->
     <div id="toast" class="toast" role="alert" aria-live="polite"></div>
-
     <script type="module" src="./script.js"></script>
 </body>
 </html>
