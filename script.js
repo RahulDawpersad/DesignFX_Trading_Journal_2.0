@@ -18,14 +18,16 @@ class DataManager {
  balance: 0,
  deposits: [],
  trades: [],
- categories: ['Scalping', 'Swing', 'News', 'Breakout']
+ categories: ['Scalping', 'Swing', 'News', 'Breakout'],
+ previousCycles: []
  },
  demo: {
  settings: { currency: 'ZAR', theme: 'light', decimals: 2 },
  balance: 0,
  deposits: [],
  trades: [],
- categories: ['Scalping', 'Swing', 'News', 'Breakout']
+ categories: ['Scalping', 'Swing', 'News', 'Breakout'],
+ previousCycles: []
  }
  },
  ui: {
@@ -266,77 +268,48 @@ class Analytics {
  constructor(dataManager) {
  this.dm = dataManager;
  }
- getCycleStart() {
-   const allEvents = [];
-   this.dm.getDeposits().forEach(d => {
-     const amount = d.type === 'deposit' ? parseFloat(d.amount) : -parseFloat(d.amount);
-     allEvents.push({ eventType: 'funding', date: new Date(d.date), amount: amount, data: d });
-   });
-   this.dm.getTrades().forEach(t => {
-     const amount = parseFloat(t.profit || 0) - parseFloat(t.fees || 0);
-     allEvents.push({ eventType: 'trade', date: new Date(t.exitTime), amount: amount, data: t });
-   });
-   allEvents.sort((a, b) => a.date - b.date);
-   let balance = 0;
-   let lastResetDate = new Date(0);
-   allEvents.forEach(event => {
-     balance += event.amount;
-     if (event.eventType === 'funding' && event.data.type === 'withdrawal' && balance <= 0) {
-       lastResetDate = event.date;
-     }
-   });
-   return lastResetDate;
- }
- getCurrentDeposits() {
-   const cycleStart = this.getCycleStart();
-   return this.dm.getDeposits().filter(d => new Date(d.date) > cycleStart);
- }
- getCurrentTrades() {
-   const cycleStart = this.getCycleStart();
-   return this.dm.getTrades().filter(t => new Date(t.exitTime) > cycleStart);
- }
  calculateBalance() {
-   const deposits = this.getCurrentDeposits();
-   let balance = 0;
-   deposits.forEach(d => {
-     balance += d.type === 'deposit' ? parseFloat(d.amount) : -parseFloat(d.amount);
-   });
-   const trades = this.getCurrentTrades();
-   trades.forEach(t => {
-     balance += parseFloat(t.profit || 0) - parseFloat(t.fees || 0);
-   });
-   return balance;
+ const deposits = this.dm.getDeposits();
+ const trades = this.dm.getTrades();
+ let balance = 0;
+ deposits.forEach(d => {
+ balance += d.type === 'deposit' ? parseFloat(d.amount) : -parseFloat(d.amount);
+ });
+ trades.forEach(t => {
+ balance += parseFloat(t.profit || 0) - parseFloat(t.fees || 0);
+ });
+ return balance;
  }
  calculateTotalPnL() {
-   const trades = this.getCurrentTrades();
-   return trades.reduce((sum, t) => sum + (parseFloat(t.profit || 0) - parseFloat(t.fees || 0)), 0);
+ const trades = this.dm.getTrades();
+ return trades.reduce((sum, t) => sum + (parseFloat(t.profit || 0) - parseFloat(t.fees || 0)), 0);
  }
  calculateWinRate() {
-   const trades = this.getCurrentTrades();
-   if (trades.length === 0) return 0;
-   const wins = trades.filter(t => parseFloat(t.profit || 0) > 0).length;
-   return (wins / trades.length) * 100;
+ const trades = this.dm.getTrades();
+ if (trades.length === 0) return 0;
+ const wins = trades.filter(t => parseFloat(t.profit || 0) > 0).length;
+ return (wins / trades.length) * 100;
  }
  calculateAverageWin() {
-   const trades = this.getCurrentTrades();
-   const wins = trades.filter(t => parseFloat(t.profit || 0) > 0);
-   if (wins.length === 0) return 0;
-   const totalWin = wins.reduce((sum, t) => sum + parseFloat(t.profit || 0), 0);
-   return totalWin / wins.length;
+ const trades = this.dm.getTrades();
+ const wins = trades.filter(t => parseFloat(t.profit || 0) > 0);
+ if (wins.length === 0) return 0;
+ const totalWin = wins.reduce((sum, t) => sum + parseFloat(t.profit || 0), 0);
+ return totalWin / wins.length;
  }
  calculateAverageLoss() {
-   const trades = this.getCurrentTrades();
-   const losses = trades.filter(t => parseFloat(t.profit || 0) < 0);
-   if (losses.length === 0) return 0;
-   const totalLoss = losses.reduce((sum, t) => sum + parseFloat(t.profit || 0), 0);
-   return totalLoss / losses.length;
+ const trades = this.dm.getTrades();
+ const losses = trades.filter(t => parseFloat(t.profit || 0) < 0);
+ if (losses.length === 0) return 0;
+ const totalLoss = losses.reduce((sum, t) => sum + parseFloat(t.profit || 0), 0);
+ return totalLoss / losses.length;
  }
  getEquityCurveData() {
-     const trades = [...this.getCurrentTrades()].sort((a, b) =>
+     const trades = [...this.dm.getTrades()].sort((a, b) =>
          new Date(a.exitTime) - new Date(b.exitTime)
      );
    
-     const deposits = [...this.getCurrentDeposits()].sort((a, b) =>
+     const deposits = [...this.dm.getDeposits()].sort((a, b) =>
          new Date(a.date) - new Date(b.date)
      );
    
@@ -381,7 +354,7 @@ class Analytics {
      return data;
  }
  getProfitBySymbol() {
- const trades = this.getCurrentTrades();
+ const trades = this.dm.getTrades();
  const symbolMap = {};
  trades.forEach(t => {
  const symbol = t.symbol || 'Unknown';
@@ -396,7 +369,7 @@ class Analytics {
  }));
  }
  getProfitByCategory() {
- const trades = this.getCurrentTrades();
+ const trades = this.dm.getTrades();
  const categoryMap = {};
  trades.forEach(t => {
  const category = t.category || 'Uncategorized';
@@ -447,6 +420,12 @@ class UIManager {
  // Deposit modal
  document.getElementById('addDepositBtn').addEventListener('click', () => this.openDepositModal());
  document.getElementById('depositForm').addEventListener('submit', (e) => this.saveDeposit(e));
+ document.getElementById('depositType').addEventListener('change', (e) => {
+     if (e.target.value === 'withdrawal') {
+         const currentBalance = this.analytics.calculateBalance();
+         document.getElementById('depositAmount').value = Math.abs(currentBalance).toFixed(2);
+     }
+ });
  // Manage Deposits
  document.getElementById('manageDepositsBtn').addEventListener('click', () => this.openDepositsModal());
  // Categories modal
@@ -458,6 +437,8 @@ class UIManager {
  this.addCategory();
  }
  });
+ // Previous Trades
+ document.getElementById('previousTradesBtn').addEventListener('click', () => this.openPreviousTradesModal());
  // Modal close buttons
  document.querySelectorAll('.modal-close, .modal-cancel').forEach(btn => {
  btn.addEventListener('click', (e) => {
@@ -674,6 +655,29 @@ class UIManager {
  this.showToast('Deposit updated successfully', 'success');
  } else {
  this.dm.addDeposit(depositData);
+ if (depositData.type === 'withdrawal') {
+     const accountData = this.dm.getCurrentAccountData();
+     const deposits = accountData.deposits.filter(d => d.type === 'deposit').sort((a, b) => new Date(b.date) - new Date(a.date));
+     const lastDeposit = deposits[0];
+     if (lastDeposit) {
+         const cycleTrades = accountData.trades.filter(t => new Date(t.entryTime) >= new Date(lastDeposit.date));
+         const cyclePnL = cycleTrades.reduce((sum, t) => sum + parseFloat(t.profit || 0) - parseFloat(t.fees || 0), 0);
+         const cycle = {
+             id: this.dm.generateId(),
+             deposit: { ...lastDeposit },
+             withdrawal: { ...depositData, id: accountData.deposits[accountData.deposits.length - 1].id },
+             trades: cycleTrades.map(t => ({ ...t })),
+             pnL: cyclePnL
+         };
+         accountData.previousCycles = accountData.previousCycles || [];
+         accountData.previousCycles.push(cycle);
+         accountData.trades = accountData.trades.filter(t => !cycleTrades.some(ct => ct.id === t.id));
+         this.dm.saveData();
+         this.showToast('Cycle archived under Previous Trades', 'success');
+     } else {
+         this.showToast('No previous deposit, withdrawal added without archiving', 'warning');
+     }
+ }
  this.showToast('Deposit added successfully', 'success');
  }
  this.closeModal('depositModal');
@@ -728,6 +732,55 @@ class UIManager {
  this.renderDepositsList();
  this.render();
  }
+ }
+ // Previous Trades Management
+ openPreviousTradesModal() {
+ this.renderPreviousCycles();
+ this.openModal('previousTradesModal');
+ }
+ renderPreviousCycles() {
+ const list = document.getElementById('previousCyclesList');
+ const accountData = this.dm.getCurrentAccountData();
+ let cycles = accountData.previousCycles || [];
+ cycles = [...cycles].sort((a, b) => new Date(b.withdrawal.date) - new Date(a.withdrawal.date));
+ if (cycles.length === 0) {
+ list.innerHTML = '<li class="empty-state">No previous trades yet</li>';
+ return;
+ }
+ list.innerHTML = cycles.map(cycle => {
+ const depAmt = parseFloat(cycle.deposit.amount);
+ const withAmt = parseFloat(cycle.withdrawal.amount);
+ const pnL = cycle.pnL;
+ const tradesHtml = cycle.trades.length > 0 ? `
+   <ul class="cycle-trades">
+     ${cycle.trades.map(t => `
+       <li>
+         ${this.escapeHtml(t.symbol)} ${this.escapeHtml(t.type)} - P&L: ${this.formatCurrency(parseFloat(t.profit) - parseFloat(t.fees || 0))} - ${this.formatDateTime(t.entryTime)} to ${this.formatDateTime(t.exitTime)}
+       </li>
+     `).join('')}
+   </ul>
+ ` : '<p>No trades in this cycle</p>';
+ return `
+   <li class="cycle-item">
+     <div class="cycle-summary">
+       <span><strong>Deposit:</strong> ${this.formatCurrency(depAmt)} on ${this.formatDateTime(cycle.deposit.date)}</span>
+       <span><strong>Withdrawal:</strong> ${this.formatCurrency(withAmt)} on ${this.formatDateTime(cycle.withdrawal.date)}</span>
+       <span><strong>P&L:</strong> ${this.formatCurrency(pnL)}</span>
+       <span><strong>Trades:</strong> ${cycle.trades.length} <button class="btn btn-sm btn-secondary toggle-trades" onclick="ui.toggleCycleTrades(this)">Show Trades</button></span>
+     </div>
+     <div class="cycle-trades-list" style="display:none;">
+       ${tradesHtml}
+     </div>
+   </li>
+ `;
+ }).join('');
+ }
+ toggleCycleTrades(btn) {
+ const summary = btn.closest('.cycle-summary');
+ const tradesList = summary.nextElementSibling;
+ const isHidden = tradesList.style.display === 'none';
+ tradesList.style.display = isHidden ? 'block' : 'none';
+ btn.textContent = isHidden ? 'Hide Trades' : 'Show Trades';
  }
  // Category Management
  openCategoriesModal() {
@@ -831,7 +884,7 @@ class UIManager {
  const symbol = document.getElementById('filterSymbol').value.toLowerCase();
  const category = document.getElementById('filterCategory').value;
  const type = document.getElementById('filterType').value;
- let trades = this.analytics.getCurrentTrades();
+ let trades = this.dm.getTrades();
  if (dateFrom) {
  const fromDate = new Date(dateFrom);
  trades = trades.filter(t => new Date(t.exitTime) >= fromDate);
@@ -885,7 +938,7 @@ class UIManager {
  const tbody = document.getElementById('tradesTableBody');
  let trades = this.filteredTrades.length > 0 || this.hasActiveFilters()
  ? this.filteredTrades
- : this.analytics.getCurrentTrades();
+ : this.dm.getTrades();
  // Sort trades
  trades = [...trades].sort((a, b) => {
  let aVal = a[this.sortColumn];
@@ -986,7 +1039,7 @@ class UIManager {
  pnlElement.textContent = this.formatCurrency(totalPnL, decimals);
  pnlElement.className = 'kpi-value ' + (totalPnL >= 0 ? 'positive' : 'negative');
  document.getElementById('kpiWinRate').textContent = this.analytics.calculateWinRate().toFixed(1) + '%';
- document.getElementById('kpiTrades').textContent = this.analytics.getCurrentTrades().length;
+ document.getElementById('kpiTrades').textContent = this.dm.getTrades().length;
  const avgWin = this.analytics.calculateAverageWin();
  document.getElementById('kpiAvgWin').textContent = this.formatCurrency(avgWin, decimals);
  const avgLoss = this.analytics.calculateAverageLoss();
